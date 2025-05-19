@@ -6,6 +6,7 @@
 ## 📂 목차
 - [SQLD](./sqld-study)
 
-## 참고
+## 출처
 - [54회 복원 문제](https://cafe.naver.com/sqlpd/84701)
+- [21회 기출 문제](https://cafe.naver.com/sqlpd)
 
