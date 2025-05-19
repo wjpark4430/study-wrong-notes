@@ -36,8 +36,10 @@
 - `NULL`은 ‘값이 존재하지 않음’을 의미하며, ‘0’이나 ‘빈 문자열’과 다름  
 - 비교 연산에서 `NULL`과의 직접 비교는 항상 `FALSE` 또는 `UNKNOWN`이므로 주의  
 - `NULL` 관련 조건은 `IS NULL` / `IS NOT NULL` 키워드를 반드시 사용  
-- ER 다이어그램 표기법(IE, Barker 등)에서 NULL 허용 여부는 각기 다른 방식으로 표현됨  
-- Velog 링크: [ERD 표기법 정리](https://velog.io/@wjpark4430/ERD-표기법-IE-표기법-vs-바커-표기법-feat.-NULL-표현-방식)
+- ER 다이어그램 표기법(IE, Barker 등)에서 NULL 허용 여부는 각기 다른 방식으로 표현됨
+
+👉 Velog 링크: [ERD 표기법 정리](https://velog.io/@wjpark4430/ERD-표기법-IE-표기법-vs-바커-표기법-feat.-NULL-표현-방식)
+
 ---
 
 ## 느낀 점
