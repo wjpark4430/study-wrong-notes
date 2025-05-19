@@ -67,4 +67,4 @@ CONNECT BY PRIOR mgr_no = emp_no
 * 하위 → 상위 = 순방향
 * 상위 → 하위 = 역방향
 
-
+👉 Velog 링크: [CONNECT BY 문법](https://velog.io/@wjpark4430/Oracle-계층형-쿼리-완전-정리-CONNECT-BY-문법)
