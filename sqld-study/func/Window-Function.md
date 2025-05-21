@@ -109,3 +109,103 @@ FROM employees;
 * `RANGE`와 `ROWS`의 차이를 명확히 이해하고 있어야됨
 * **값 기준의 범위 계산에는 `RANGE`**, **행 수 기준 계산에는 `ROWS`** 사용
 
+---
+
+# 📌 윈도우 함수 + 부서별 연봉 조건 오답노트 2
+
+| 항목            | 설명                                                                 |
+| --------------- | ------------------------------------------------------------------ |
+| 핵심 쿼리 패턴      | `ROW_NUMBER() OVER(PARTITION BY DEPT_ID ORDER BY SALARY DESC)` 사용 |
+| 비교 함수/문법      | `RANK()`, `GROUP BY + MAX`, `ROWNUM`, 서브쿼리 MAX                |
+| 주의할 점         | RANK와 ROW_NUMBER의 차이, ROWNUM과 ORDER BY의 실행 순서, 집계 레벨     |
+
+---
+
+## 문제
+
+![27번 문제](../images/34-27.png)
+
+---
+
+## 기준 SQL
+
+```sql
+SELECT DEPT_ID, SALARY
+FROM (
+    SELECT ROW_NUMBER() OVER(PARTITION BY DEPT_ID ORDER BY SALARY DESC) RN, DEPT_ID, SALARY
+    FROM SQLD_34_27
+)
+WHERE RN = 1
+```
+- 각 부서(DEPT_ID)별로 연봉(SALARY) 내림차순 정렬 후, 1등만 추출  
+- 동점자가 있어도 부서별 1건만 출력됨
+
+---
+
+## ❌ 오답 분석
+
+### ❌ 1번
+
+> `RANK() OVER(PARTITION BY DEPT_ID ORDER BY SALARY DESC)` 사용
+
+* RANK()는 동점자가 있으면 **여러 행이 RN=1**  
+* 부서별 최고 연봉자가 여러 명이면 모두 출력됨  
+* 기준 SQL은 **부서별 1건만** 출력 → 결과 다름  
+* ❌ **정답 아님**
+
+---
+
+### ✅ 2번
+
+> `SELECT DEPT_ID, MAX(SALARY) ... GROUP BY DEPT_ID`
+
+* 부서별 최고 연봉만 추출  
+* EMP_ID는 없지만, **DEPT_ID와 SALARY만 출력**  
+* 동점자 있어도 한 행만 출력  
+* 기준 SQL과 **결과 동일**  
+* **정답!**
+
+---
+
+### ❌ 3번
+
+> `WHERE ROWNUM = 1 ORDER BY DEPT_ID, SALARY DESC`
+
+* ROWNUM은 **정렬 전에** 적용됨  
+* 전체 테이블에서 한 행만 출력  
+* 부서별 최고 연봉과 무관  
+* ❌ **정답 아님**
+
+---
+
+### ❌ 4번
+
+> `WHERE SALARY = (SELECT MAX(SALARY) ...)`
+
+* 전체 테이블에서 최고 연봉만 추출  
+* 부서별이 아님  
+* ❌ **정답 아님**
+
+---
+
+## 추가 설명 & 복습 포인트
+
+| 함수/문법         | 특징 및 차이점                                      |
+| ---------------- | ------------------------------------------------- |
+| ROW_NUMBER()     | 동점자 없이 순번 부여, 부서별 1건만 추출 가능            |
+| RANK()           | 동점자 모두 같은 순위, 부서별 동점자 모두 추출됨         |
+| GROUP BY + MAX   | 부서별 최고값만 추출, EMP_ID 등 다른 컬럼은 알 수 없음   |
+| ROWNUM           | 정렬 전에 적용되어 원하는 결과가 아닐 수 있음           |
+| 서브쿼리 MAX     | 전체 테이블에서 최고값만 추출, 부서별 아님             |
+
+
+👉 Velog 링크: [SQL 순위 함수 정리](https://velog.io/@wjpark4430/SQL-순위-함수-정리-RANK-DENSERANK-ROWNUMBER-NTILEn)
+
+---
+
+## 느낀 점
+
+* **윈도우 함수(ROW_NUMBER, RANK)와 GROUP BY의 차이**를 명확히 구분
+* **ROWNUM, ORDER BY의 실행 순서**에 주의
+* 문제에서 요구하는 "부서별" 조건을 항상 꼼꼼히 확인
+* 동점자 처리 방식(ROW_NUMBER vs RANK)도 꼭 구분해서 기억
