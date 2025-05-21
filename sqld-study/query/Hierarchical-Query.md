@@ -81,7 +81,7 @@ CONNECT BY PRIOR mgr_no = emp_no
 
 ## 문제
 
-!\[문제 이미지]\(첨부된 이미지 참고)
+![34-19번 문제](../images/34-19.png)
 
 ---
 
