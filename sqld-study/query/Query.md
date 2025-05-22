@@ -301,3 +301,98 @@ WHERE SALARY > 200
 ## 느낀 점
 
 * WHERE 조건의 논리 연산자 우선순위가 의도와 달라질 수 있기 때문에 괄호를 항상 중요하게 해야함
+
+# 📌 MERGE 문(Upsert) 동작 방식 오답노트
+
+| 항목           | 설명                                                         |
+| -------------- | ---------------------------------------------------------- |
+| MERGE 문       | 조건에 따라 UPDATE, DELETE, INSERT를 한 번에 처리하는 DML 구문 |
+| 동작 순서      | WHEN MATCHED(UPDATE/DELETE) → WHEN NOT MATCHED(INSERT)      |
+| 실수 포인트    | **UPDATE와 DELETE가 모두 있을 때, UPDATE가 실행된 행만 DELETE 조건 평가** |
+
+---
+
+## 문제
+
+![30-42번 문제](../images/30-42.png)
+
+---
+
+## 쿼리 해설
+
+```sql
+MERGE INTO SQLD_30_42_01 A
+USING SQLD_30_42_02 B
+ON (A.COL1 = B.COL1)
+WHEN MATCHED THEN
+  UPDATE SET A.COL3 = 4
+    WHERE A.COL3 = 2
+  DELETE WHERE A.COL3 <= 2
+WHEN NOT MATCHED THEN
+  INSERT (A.COL1, A.COL2, A.COL3) VALUES (B.COL1, B.COL2, B.COL3);
+```
+
+## MERGE 동작 단계별 분석
+
+### 1) ON 조건 일치 (A.COL1 = B.COL1)
+- 일치: A, B, C
+
+### 2) WHEN MATCHED THEN
+- **UPDATE SET A.COL3 = 4 WHERE A.COL3 = 2**
+  - B: COL3=2 → COL3=4로 변경
+- **DELETE WHERE A.COL3 <= 2**
+  - **UPDATE가 실행된 행만 DELETE 조건 평가**
+  - B: UPDATE 실행(4) → COL3=4, DELETE 조건(X)
+  - A: UPDATE 조건 불일치(1≠2) → UPDATE 실행 안 됨, DELETE도 실행 안 됨 (종속)
+  - C: UPDATE 조건 불일치(3≠2) → UPDATE 실행 안 됨, DELETE도 실행 안 됨
+
+### 3) WHEN NOT MATCHED THEN (A에 없는 B의 데이터 INSERT)
+- D, E 추가
+
+---
+
+## 최종 테이블 상태
+
+| COL1 | COL2 | COL3 |
+|------|------|------|
+| A    | X    | 1    | ← 기존 데이터(변화 없음)
+| B    | Y    | 4    | ← UPDATE
+| C    | Z    | 3    |
+| X    | T    | 1    | ← 기존 데이터(ON 조건 불일치, 변화 없음)
+| D    | 가    | 4    | ← INSERT
+| E    | 나    | 5    | ← INSERT
+
+**A(유지), B(업데이트), C(유지), D(삽입), E(삽입), X(유지)**
+
+- A: UPDATE/DELETE 모두 미실행 → **유지**
+- B: UPDATE(4) → DELETE 조건 불일치 → **유지**
+- C: UPDATE/DELETE 모두 미실행 → **유지**
+- D: INSERT(4)
+- E: INSERT(5)
+- X: ON 조건 불일치 → **유지**
+
+**최종 행 수: 6**
+
+---
+
+## 결론
+
+- **정답: 4) 6**
+
+---
+
+## 복습 포인트
+
+- MERGE의 WHEN MATCHED에서 UPDATE와 DELETE가 모두 있으면,  
+  **UPDATE가 실행된 행만 DELETE 조건을 평가**  
+  (UPDATE 조건 불일치 시 DELETE도 실행되지 않음)
+- ON 조건 불일치 행은 영향 없음
+- INSERT는 A에 없는 B의 행만 추가됨
+
+---
+
+## 느낀 점
+
+* MERGE 문에서 UPDATE와 DELETE가 동시에 걸릴 때,  
+  **UPDATE가 실행된 행만 DELETE 조건을 다시 평가**한다는 점을 반드시 기억해야 함
+* 데이터 변화 과정을 표로 직접 써보면 실수 방지에 도움이 됨
