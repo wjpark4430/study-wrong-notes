@@ -209,6 +209,8 @@
 
 💡 `CUBE`는 완전한 교차 조합을 포함하므로, 결과가 가장 많고 구조적으로도 가장 복잡함. 따라서 **결과값이 다르다**고 할 수 있음.
 
+👉 Velog 링크: [GROUP BY 확장 기능 정리](https://velog.io/@wjpark4430/GROUP-BY-확장-기능-정리-ROLLUP-CUBE-GROUPING-SETS)
+
 ---
 
 ## 느낀 점
@@ -216,6 +218,8 @@
 * 기존에는 `ROLLUP`, `GROUPING SETS`, `UNION ALL` 방식이 모두 같은 결과를 낸다고 착각
 * `CUBE`만이 `DNAME`, `JOB`의 **모든 조합 + 전체 요약까지 포함**된다는 점이 결정적인 차이
 * `GROUP BY` 관련 함수들을 사용할 때 **결과의 포함 범위**에 주의해서 사용 필요
+
+---
 
 # 📌 WHERE 조건 우선순위 & 논리 연산자 오답노트
 
